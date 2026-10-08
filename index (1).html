@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>X Comment Generator</title>
+  <style>
+    :root {
+      --teal-50: #f0faf9;
+      --teal-100: #d5f3ef;
+      --teal-200: #a8e6de;
+      --teal-300: #6dd4c7;
+      --teal-400: #3bb8a8;
+      --teal-500: #1f9a8a;
+      --teal-600: #167a6e;
+      --teal-700: #0f5c53;
+      --text: #12302c;
+      --text-light: #3d5e58;
+      --white: #ffffff;
+      --border: #c5e8e2;
+      --shadow: 0 4px 24px rgba(31, 154, 138, 0.14);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(160deg, var(--teal-50) 0%, #fff 40%, var(--teal-100) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+      line-height: 1.5;
+    }
+    .container {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    header { text-align: center; padding: 12px 0 8px; }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--teal-600);
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-top: 6px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .counter {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--teal-600);
+      text-align: center;
+      padding: 10px 16px;
+      background: var(--teal-50);
+      border-radius: 10px;
+      border: 1px solid var(--teal-200);
+    }
+    .preview-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .preview {
+      background: var(--teal-50);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      min-height: 140px;
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.55;
+      word-break: break-word;
+    }
+    .preview.empty {
+      color: var(--text-light);
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    button {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+      width: 100%;
+    }
+    button:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--teal-500);
+      color: var(--white);
+      box-shadow: 0 4px 14px rgba(31, 154, 138, 0.35);
+    }
+    .btn-primary:hover { background: var(--teal-600); }
+    .btn-primary:disabled {
+      background: var(--teal-300);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-secondary {
+      background: var(--white);
+      color: var(--teal-600);
+      border: 2px solid var(--teal-300);
+    }
+    .btn-secondary:hover {
+      background: var(--teal-50);
+      border-color: var(--teal-400);
+    }
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      padding: 8px 12px;
+      background: var(--teal-50);
+      border-radius: 8px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--teal-700);
+      color: var(--white);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    footer {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-align: center;
+    }
+    @media (min-width: 480px) {
+      h1 { font-size: 2rem; }
+      .actions { flex-direction: row; }
+      .actions button { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>X Comment Generator</h1>
+      <p class="subtitle">PerthSanta x Destiny Clinic</p>
+    </header>
+    <div class="card">
+      <div class="counter" id="counter">Đã copy: 0 comment</div>
+      <div>
+        <div class="preview-label">Last generated comment</div>
+        <div class="preview empty" id="preview">Press Generate &amp; Copy to create a comment</div>
+      </div>
+      <div class="actions">
+        <button class="btn-primary" id="btnGenerate">Generate &amp; Copy</button>
+        <button class="btn-secondary" id="btnPost" disabled>Generate &amp; Post to X</button>
+      </div>
+      <div class="hint">Press Space to Generate &amp; Post to X</div>
+    </div>
+    <footer>No login required. All comments stay on your device.</footer>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script>
+    (function () {
+      // Format:
+      // body
+      //
+      // PERTHSANTA BEAUTY BLOOM
+      //
+      // #destinyclinicxPerthSanta
+      // #PerthSanta
+      const FIXED_SUFFIX = '\n\nPERTHSANTA BEAUTY BLOOM\n\n#destinyclinicxPerthSanta\n#PerthSanta';
+      const FIXED_LEN = FIXED_SUFFIX.length;
+      const MAX_BODY = 280 - FIXED_LEN - 5;
+
+      const openings = [
+        "Loving",
+        "Obsessed with",
+        "Really into",
+        "Impressed by",
+        "So into",
+        "Happy to see",
+        "This hits different",
+        "Huge fan of",
+        "Excited about",
+        "Blown away by",
+        "Major respect for",
+        "Truly into",
+        "Can't stop watching",
+        "Feeling the energy from",
+        "Pure quality from",
+        "Living for"
+      ];
+
+      const perthSantaPraises = [
+        "PerthSanta looks incredible here",
+        "PerthSanta's presence is pure charisma",
+        "how naturally PerthSanta carries the vibe",
+        "PerthSanta's style feels so elevated",
+        "PerthSanta brings real star power",
+        "PerthSanta's glow in this is unreal",
+        "the way PerthSanta owns every frame",
+        "PerthSanta delivers pure confidence",
+        "PerthSanta looks radiant throughout",
+        "PerthSanta's energy feels so fresh"
+      ];
+
+      const collabPraises = [
+        "PerthSanta and Destiny Clinic were made for this",
+        "this PerthSanta x Destiny Clinic moment works perfectly",
+        "seeing PerthSanta with Destiny Clinic is a win",
+        "the chemistry between PerthSanta and Destiny Clinic is real",
+        "PerthSanta representing Destiny Clinic just fits",
+        "PerthSanta and Destiny Clinic complement each other so well",
+        "this collab between PerthSanta and Destiny Clinic delivers",
+        "PerthSanta bringing Destiny Clinic into a new light",
+        "the PerthSanta x Destiny Clinic pairing elevates everything",
+        "PerthSanta channels the Destiny Clinic spirit so well"
+      ];
+
+      const clinicPraises = [
+        "Destiny Clinic always delivers that premium care",
+        "the Destiny Clinic experience feels elevated",
+        "Destiny Clinic keeps setting the standard",
+        "choosing Destiny Clinic makes the routine feel special",
+        "Destiny Clinic quality speaks for itself",
+        "Destiny Clinic brings trust and results together",
+        "there's a reason Destiny Clinic stays on top",
+        "Destiny Clinic turns beauty care into something refined",
+        "the results from Destiny Clinic are consistently impressive",
+        "Destiny Clinic understands modern beauty care"
+      ];
+
+      const vibePraises = [
+        "the campaign vibe is so fresh and confident",
+        "the atmosphere feels soft yet powerful",
+        "there's a clean modern energy running through this",
+        "the mood is polished and completely on brand",
+        "this campaign radiates quiet confidence",
+        "the creative direction feels intentional and light",
+        "everything about the campaign feels inviting",
+        "the energy is modern and genuinely uplifting",
+        "the campaign mood is pure celebration of beauty",
+        "there's a soft premium vibe that works so well"
+      ];
+
+      const futureWishes = [
+        "hope we get more moments like this",
+        "already looking forward to the next one",
+        "would love to see this partnership continue",
+        "please make this a regular thing",
+        "can't wait for future drops",
+        "more collabs like this would be amazing",
+        "this deserves a sequel",
+        "hoping this is just the beginning",
+        "bring on the next campaign",
+        "eager for whatever comes next"
+      ];
+
+      const connectors = [
+        "and",
+        "plus",
+        "while",
+        "and honestly",
+        "alongside",
+        "together with",
+        "not to mention",
+        "and of course"
+      ];
+
+      const closers = [
+        "Absolute win.",
+        "This is how it's done.",
+        "Simply outstanding.",
+        "Nothing but respect.",
+        "Truly inspiring.",
+        "Keep it coming.",
+        "This hits different.",
+        "Pure quality.",
+        "Well executed.",
+        "So well done."
+      ];
+
+      function pick(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function capitalize(str) {
+        if (!str) return str;
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      const shortStructures = [
+        () => `${pick(openings)} ${pick(perthSantaPraises)}.`,
+        () => `${pick(openings)} ${pick(collabPraises)}.`,
+        () => `${pick(openings)} ${pick(clinicPraises)}.`,
+        () => `${pick(openings)} ${pick(vibePraises)}.`,
+        () => `${pick(perthSantaPraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(collabPraises)}. ${pick(closers)}`,
+        () => `${pick(clinicPraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(vibePraises)}. ${pick(closers)}`
+      ];
+
+      const mediumStructures = [
+        () => `${pick(openings)} ${pick(perthSantaPraises)} ${pick(connectors)} ${pick(collabPraises)}.`,
+        () => `${pick(openings)} ${pick(collabPraises)}. ${pick(clinicPraises)}.`,
+        () => `${pick(perthSantaPraises)} ${pick(connectors)} ${pick(vibePraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(openings)} ${pick(clinicPraises)}. ${pick(vibePraises)}.`,
+        () => `${pick(collabPraises)}. ${pick(perthSantaPraises)}. ${pick(closers)}`,
+        () => `${pick(openings)} ${pick(vibePraises)} ${pick(connectors)} ${pick(clinicPraises)}.`,
+        () => `${pick(perthSantaPraises)}. ${pick(collabPraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(clinicPraises)} ${pick(connectors)} ${pick(collabPraises)}. ${pick(closers)}`
+      ];
+
+      const longStructures = [
+        () => `${pick(openings)} ${pick(perthSantaPraises)}. ${pick(collabPraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(openings)} ${pick(collabPraises)}. ${pick(vibePraises)}. ${pick(closers)}`,
+        () => `${pick(perthSantaPraises)}. ${pick(collabPraises)}. ${pick(clinicPraises)}.`,
+        () => `${pick(openings)} ${pick(vibePraises)}. ${pick(perthSantaPraises)}. ${pick(closers)}`,
+        () => `${pick(collabPraises)}. ${pick(clinicPraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(openings)} ${pick(clinicPraises)}. ${pick(vibePraises)}. ${pick(futureWishes)}.`,
+        () => `${pick(perthSantaPraises)}. ${pick(collabPraises)}. ${pick(vibePraises)}.`,
+        () => `${pick(openings)} ${pick(collabPraises)}. ${pick(clinicPraises)}. ${pick(closers)}`
+      ];
+
+      function generateCommentBody() {
+        const roll = Math.random();
+        let body;
+        if (roll < 0.30) {
+          body = pick(shortStructures)();
+        } else if (roll < 0.70) {
+          body = pick(mediumStructures)();
+        } else {
+          body = pick(longStructures)();
+        }
+        body = body.replace(/\s+/g, ' ').trim();
+        body = capitalize(body);
+        if (!/[.!?]$/.test(body)) body += '.';
+
+        if (body.length > MAX_BODY) {
+          body = body.slice(0, MAX_BODY - 1).trim();
+          if (!/[.!?]$/.test(body)) body += '.';
+        }
+        return body;
+      }
+
+      function formatFullComment(body) {
+        return body + FIXED_SUFFIX;
+      }
+
+      const STORAGE_KEY = 'xcg_perthsanta_destiny_v1';
+      let state = { count: 0, history: [] };
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.count === 'number' && Array.isArray(parsed.history)) {
+              state = parsed;
+            }
+          }
+        } catch (e) {}
+      }
+
+      function saveState() {
+        try {
+          if (state.history.length > 1000) {
+            state.history = state.history.slice(-1000);
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      let lastFullComment = null;
+
+      function updateUI() {
+        document.getElementById('counter').textContent = `Đã copy: ${state.count} comment`;
+        const preview = document.getElementById('preview');
+        if (lastFullComment) {
+          preview.textContent = lastFullComment;
+          preview.classList.remove('empty');
+          document.getElementById('btnPost').disabled = false;
+        }
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+      }
+
+      function generateUnique() {
+        for (let i = 0; i < 80; i++) {
+          const body = generateCommentBody();
+          if (!state.history.includes(body)) return body;
+        }
+        return generateCommentBody() + ' ' + pick(closers);
+      }
+
+      async function generateAndCopy(alsoPost) {
+        const body = generateUnique();
+        const full = formatFullComment(body);
+
+        try {
+          await navigator.clipboard.writeText(full);
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = full;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); }
+          catch (e2) {
+            showToast('Copy failed. Please copy manually.');
+            lastFullComment = full;
+            updateUI();
+            return;
+          }
+          document.body.removeChild(ta);
+        }
+
+        lastFullComment = full;
+        state.count += 1;
+        state.history.push(body);
+        saveState();
+        updateUI();
+        showToast(alsoPost ? 'Copied & opening X' : 'Comment copied');
+
+        if (alsoPost) {
+          setTimeout(() => {
+            const url = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(full);
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }, 300);
+        }
+      }
+
+      document.getElementById('btnGenerate').addEventListener('click', () => generateAndCopy(false));
+      document.getElementById('btnPost').addEventListener('click', () => generateAndCopy(true));
+
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target === document.body) {
+          e.preventDefault();
+          generateAndCopy(true);
+        }
+      });
+
+      loadState();
+      updateUI();
+    })();
+  </script>
+</body>
+</html>
